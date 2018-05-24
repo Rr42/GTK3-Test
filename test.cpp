@@ -10,8 +10,16 @@ GtkWidget *textBox;
 GtkWidget *buttonSubmit;
 GtkWidget *buttonCancel;
 
-/// GDK properities
-GdkRGBA color;
+GdkRGBA* setRGB(int r, int g, int b)
+{
+  GdkRGBA color;
+  color.red = r;
+  color.green = g;
+  color.blue = b;
+  color.alpha = 1;
+
+  return &color;
+}
 
 static void button1(GtkWidget *widget, gpointer data)
 {
@@ -31,6 +39,10 @@ static void submitClicked(GtkWidget *widget, gpointer data)
   entryBuffer = gtk_entry_get_buffer(GTK_ENTRY(textBox));
 
   g_print("Text in textbox: %s\n", gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(entryBuffer)));
+
+  int w,h;
+  gtk_window_get_size(GTK_WINDOW(window), &w, &h);
+  g_print("Width: %d, Height: %d\n", w, h);
 
 }
 
@@ -91,21 +103,13 @@ static void activate(GtkApplication* app, gpointer user_data)
   buttonSubmit = gtk_button_new_with_label ("Submit");
   g_signal_connect (buttonSubmit, "clicked", G_CALLBACK (submitClicked), NULL);
   gtk_grid_attach(GTK_GRID(windowGrid), buttonSubmit, 0, 5, 1, 1);
-  color.red = 0; ///Red
-  color.green = 1; ///Green
-  color.blue = 0; ///Blue
-  color.alpha = 1; ///Transprency
-  gtk_widget_override_color(GTK_WIDGET(buttonSubmit), GTK_STATE_FLAG_NORMAL, &color);
+  gtk_widget_override_color(GTK_WIDGET(buttonSubmit), GTK_STATE_FLAG_NORMAL, setRGB(0, 1, 0));
 
   /// Make cancel button
   buttonCancel = gtk_button_new_with_label ("Cancel");
   g_signal_connect_swapped (buttonCancel, "clicked", G_CALLBACK (gtk_widget_destroy), window);
   gtk_grid_attach(GTK_GRID(windowGrid), buttonCancel, 1, 5, 1, 1);
-  color.red = 1; ///Red
-  color.green = 0; ///Green
-  color.blue = 0; ///Blue
-  color.alpha = 1; ///Transprency
-  gtk_widget_override_color(GTK_WIDGET(buttonCancel), GTK_STATE_FLAG_NORMAL, &color);
+  gtk_widget_override_color(GTK_WIDGET(buttonCancel), GTK_STATE_FLAG_NORMAL, setRGB(1, 0, 0));
 
   gtk_widget_show_all (window);
 }
