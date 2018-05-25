@@ -1,5 +1,4 @@
-#include <gtk/gtk.h>
-#include "gtk3.h"
+#include "GTK3Test.h"
 
 /// GTK Widgets
 GtkWidget *window;
@@ -9,41 +8,75 @@ GtkWidget *textLabel;
 GtkWidget *textBox;
 GtkWidget *buttonSubmit;
 GtkWidget *buttonCancel;
+GtkWidget *textViewWindow;
+GtkWidget *scrolledwindow;
 
-GdkRGBA* setRGB(int r, int g, int b)
+/// GDK properties
+GdkRGBA color;
+
+void textViewPrint(const char* format, ...)
 {
-  GdkRGBA color;
-  color.red = r;
-  color.green = g;
-  color.blue = b;
-  color.alpha = 1;
+  va_list arglist;
+  /// initialize valist for format arguments
+  va_start(arglist, format);
+  char* str;
+  // g_print("--in-print--\n");
+  // vprintf(format, arglist);
+  vsprintf(str, format, arglist);
+  // g_print("text: ");
+  // g_print(str);
+  // g_print("\n");
+  va_end(arglist);
+  // g_print("--text-gen-done--\n");
 
-  return &color;
+  GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textViewWindow));
+  // g_print("--buffer-created--\n");
+  gtk_text_buffer_insert_at_cursor(GTK_TEXT_BUFFER(buffer), str, strlen(str));
+  // g_print("--text-buffered--\n");
+  gtk_text_view_set_buffer(GTK_TEXT_VIEW(textViewWindow), buffer);
+  // g_print("--text-printed--\n");
+}
+
+ void setRGB(GdkRGBA* color, int r, int g, int b)
+{
+  color->red = r;
+  color->green = g;
+  color->blue = b;
+  color->alpha = 1;
 }
 
 static void button1(GtkWidget *widget, gpointer data)
 {
-  g_print ("Button1\n");
+  textViewPrint ("Button1\n");
 }
 
 static void submitClicked(GtkWidget *widget, gpointer data)
 {
   g_print("Submitted\n");
+  textViewPrint("Submitted\n");
 
   if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(radioButton1)))
+  {
     g_print("Radio 1 selected\n");
+    textViewPrint("Radio 1 selected\n");
+  }
   else
+  {
     g_print("Radio 2 selected\n");
+    textViewPrint("Radio 2 selected\n");
+  }
   
   GtkEntryBuffer *entryBuffer;
   entryBuffer = gtk_entry_get_buffer(GTK_ENTRY(textBox));
 
   g_print("Text in textbox: %s\n", gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(entryBuffer)));
+  textViewPrint("Text in textbox: %s\n", gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(entryBuffer)));
 
   int w,h;
   gtk_window_get_size(GTK_WINDOW(window), &w, &h);
+  
   g_print("Width: %d, Height: %d\n", w, h);
-
+  textViewPrint("Width: %i, Height: %i\n", w, h);
 }
 
 static void activate(GtkApplication* app, gpointer user_data)
@@ -103,13 +136,26 @@ static void activate(GtkApplication* app, gpointer user_data)
   buttonSubmit = gtk_button_new_with_label ("Submit");
   g_signal_connect (buttonSubmit, "clicked", G_CALLBACK (submitClicked), NULL);
   gtk_grid_attach(GTK_GRID(windowGrid), buttonSubmit, 0, 5, 1, 1);
-  gtk_widget_override_color(GTK_WIDGET(buttonSubmit), GTK_STATE_FLAG_NORMAL, setRGB(0, 1, 0));
+  setRGB(&color, 0, 1, 0);
+  gtk_widget_override_color(GTK_WIDGET(buttonSubmit), GTK_STATE_FLAG_NORMAL, &color);
 
   /// Make cancel button
   buttonCancel = gtk_button_new_with_label ("Cancel");
   g_signal_connect_swapped (buttonCancel, "clicked", G_CALLBACK (gtk_widget_destroy), window);
   gtk_grid_attach(GTK_GRID(windowGrid), buttonCancel, 1, 5, 1, 1);
-  gtk_widget_override_color(GTK_WIDGET(buttonCancel), GTK_STATE_FLAG_NORMAL, setRGB(1, 0, 0));
+  setRGB(&color, 1, 0, 0);
+  gtk_widget_override_color(GTK_WIDGET(buttonCancel), GTK_STATE_FLAG_NORMAL, &color);
+
+  /// Make text view widget
+  scrolledwindow = gtk_scrolled_window_new(NULL, NULL);
+  textViewWindow = gtk_text_view_new();
+  gtk_container_add(GTK_CONTAINER(scrolledwindow), textViewWindow);
+  gtk_text_view_set_editable(GTK_TEXT_VIEW(textViewWindow), FALSE);
+  gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(textViewWindow), TRUE);
+  gtk_text_view_set_overwrite(GTK_TEXT_VIEW(textViewWindow), FALSE);
+  //gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(textViewWindow), GTK_WRAP_WORD);
+  gtk_widget_set_size_request(GTK_WIDGET(scrolledwindow), 2, 80);
+  gtk_grid_attach(GTK_GRID(windowGrid), scrolledwindow, 0, 6, 5, 5);
 
   gtk_widget_show_all (window);
 }

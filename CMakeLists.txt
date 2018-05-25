@@ -23,8 +23,8 @@ INCLUDE_DIRECTORIES ("${CMAKE_CURRENT_SOURCE_DIR}/includes")
 # configure a header file to pass some of the CMake settings
 # to the source code
 CONFIGURE_FILE (
-"${PROJECT_INCLUDE_DIR}/gtk3.h.in"
-"${PROJECT_INCLUDE_DIR}/gtk3.h"
+"${PROJECT_INCLUDE_DIR}/GTK3Test.h.in"
+"${PROJECT_INCLUDE_DIR}/GTK3Test.h"
 )
 
 LINK_DIRECTORIES (${GTK3_LIBRARY_DIRS})
