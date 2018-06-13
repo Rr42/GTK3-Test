@@ -10,6 +10,8 @@ GtkWidget *buttonSubmit;
 GtkWidget *buttonCancel;
 GtkWidget *textViewWindow;
 GtkWidget *scrolledwindow;
+GtkWidget *scrollbar;
+GtkAdjustment * adj;
 
 /// GDK properties
 GdkRGBA color;
@@ -77,7 +79,31 @@ static void submitClicked(GtkWidget *widget, gpointer data)
   
   g_print("Width: %d, Height: %d\n", w, h);
   textViewPrint("Width: %i, Height: %i\n", w, h);
+  gtk_adjustment_set_value(adj, 40);
 }
+
+gboolean GTK_keyboard_key_press(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+  switch(event->key.state)
+  {
+    case GDK_SHIFT_MASK:
+      g_print("SHIFT+");
+      break;
+    case GDK_CONTROL_MASK:
+      g_print("CONTROL+");
+      break;
+  }
+  
+  g_print("%c\n", (char)gdk_keyval_to_unicode(event->key.keyval));
+
+  return FALSE;
+}
+gboolean GTK_mouse_click(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+  g_print("x = %f\n", event->button.x_root);
+  g_print("y = %f\n", event->button.y_root);
+}
+
 
 static void activate(GtkApplication* app, gpointer user_data)
 {
@@ -85,7 +111,9 @@ static void activate(GtkApplication* app, gpointer user_data)
   window = gtk_application_window_new(app);
   gtk_window_set_title(GTK_WINDOW(window), "Window");
   gtk_window_set_default_size(GTK_WINDOW(window), 200, 200);
-
+  g_signal_connect (window, "key_press_event", G_CALLBACK (GTK_keyboard_key_press), NULL);
+  g_signal_connect (window, "button_press_event", G_CALLBACK (GTK_mouse_click), NULL);
+  
   /// grid to hold multiple witgets
   windowGrid = gtk_grid_new();
   /// Attach grid to window
@@ -156,6 +184,10 @@ static void activate(GtkApplication* app, gpointer user_data)
   //gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(textViewWindow), GTK_WRAP_WORD);
   gtk_widget_set_size_request(GTK_WIDGET(scrolledwindow), 2, 80);
   gtk_grid_attach(GTK_GRID(windowGrid), scrolledwindow, 0, 6, 5, 5);
+
+  adj = gtk_adjustment_new(2, 0, 5, 1, 10, 500);
+  scrollbar = gtk_scrollbar_new(GTK_ORIENTATION_VERTICAL, adj);
+  gtk_container_add(GTK_CONTAINER(windowGrid), scrollbar);
 
   gtk_widget_show_all (window);
 }
