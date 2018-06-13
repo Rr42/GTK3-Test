@@ -102,6 +102,8 @@ gboolean GTK_mouse_click(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
   g_print("x = %f\n", event->button.x_root);
   g_print("y = %f\n", event->button.y_root);
+  
+  return FALSE;
 }
 
 
